@@ -5,7 +5,7 @@ SELECT DISTINCT nombre FROM producto;
 SELECT nombre, precio FROM producto;
 
 -- 3. Llista totes les columnes de la taula producto.
-SELECT * FROM producto;
+SELECT codigo, nombre, precio, codigo_fabricante FROM producto;
 
 -- 4. Llista el nom dels productes, el preu en euros (precio_eur) i el preu en dòlars estatunidencs (precio_usd) amb un tipus de canvi de 1 € = 1 $.
 SELECT nombre, precio AS precio_eur, precio * 1  AS precio_usd 
@@ -61,12 +61,12 @@ FROM producto
 ORDER BY nombre ASC, precio DESC;
 
 -- 16. Retorna una llista amb les 5 primeres files de la taula fabricante.
-SELECT * 
+SELECT codigo, nombre
 FROM fabricante 
 LIMIT 5;
 
 -- 17. Retorna una llista amb 2 files a partir de la quarta fila de la taula fabricante. La quarta fila també s'ha d'incloure en la resposta.
-SELECT * 
+SELECT codigo, nombre
 FROM fabricante 
 LIMIT 2 OFFSET 3;
 
@@ -161,7 +161,7 @@ WHERE p.precio >= 180
 ORDER BY p.precio DESC, p.nombre ASC;
 
 -- 33. Retorna un llistat amb el codi i el nom de fabricant (fabricante), solament d'aquells fabricants que tenen productes associats en la base de dades.
-SELECT DISTINCT f.codigo, f.nombre AS fabricante 
+SELECT DISTINCT f.codigo, f.nombre
 FROM fabricante f 
 INNER JOIN producto p ON f.codigo = p.codigo_fabricante;
 
@@ -177,12 +177,12 @@ LEFT JOIN producto p ON f.codigo = p.codigo_fabricante
 WHERE p.codigo IS NULL;
 
 -- 36. Retorna tots els productes del fabricant Lenovo. (Sense utilitzar INNER JOIN).
-SELECT * 
+SELECT codigo, nombre, precio, codigo_fabricante 
 FROM producto 
 WHERE codigo_fabricante = (SELECT codigo FROM fabricante WHERE nombre = 'Lenovo');
 
 -- 37. Retorna totes les dades dels productes que tenen el mateix preu que el producte més car del fabricant Lenovo. (Sense usar INNER JOIN).
-SELECT * 
+SELECT codigo, nombre, precio, codigo_fabricante 
 FROM producto 
 WHERE precio = (
     SELECT MAX(precio) FROM producto 
@@ -209,7 +209,7 @@ WITH cte_max_lenovo_price AS (
     FROM producto 
     WHERE codigo_fabricante = (SELECT codigo FROM fabricante WHERE nombre = 'Lenovo')
 )
-SELECT * 
+SELECT codigo, nombre, precio, codigo_fabricante
 FROM producto 
 WHERE precio >= ( SELECT max_lenovo_price from cte_max_lenovo_price)
 ;
@@ -219,9 +219,10 @@ WITH cte_avg_asus_price AS (
     SELECT codigo_fabricante, AVG(precio) as avg_asus_price 
     FROM producto 
     WHERE codigo_fabricante = (SELECT codigo FROM fabricante WHERE nombre = 'Asus')
+    GROUP BY codigo_fabricante
 )
-SELECT * 
-FROM producto
+SELECT codigo, nombre, precio, codigo_fabricante
+FROM producto P
 WHERE codigo_fabricante = (SELECT codigo_fabricante FROM cte_avg_asus_price) 
 	AND precio >= ( SELECT avg_asus_price from cte_avg_asus_price)
 ;
